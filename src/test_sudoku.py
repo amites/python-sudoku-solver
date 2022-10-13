@@ -50,6 +50,12 @@ SUDOKU_PUZZLES = [
 ]
 
 
+SUDOKU_BOARDS_INVALID = [
+    '004333209005009001070060043006002087190007400050083000600000105003508690042910300',
+    '..43332.9..5..9..1.7..6..43..6..2.8719...74...5..83...6.....1.5..35.869..4291.3..',
+]
+
+
 SUDOKU_PUZZLES_FORMAT = [
     {
         'single': '346179258187523964529648371965832417472916835813754629798261543631485792254397186',
@@ -113,23 +119,28 @@ class TestSudokuMethods(unittest.TestCase):
         sudoku = SudokuMethods()
         for puzzle in SUDOKU_PUZZLES:
             sudoku.solve_board(puzzle['board'])
-            self.assertEqual(sudoku.format_str(spaces=False), puzzle['answer'])
+            self.assertEqual(sudoku.format_board(spaces=False), puzzle['answer'])
 
     def test_solve_board_type(self):
         sudoku = SudokuMethods()
         puzzle = SUDOKU_PUZZLES[0]
-        board = sudoku.parse_str(puzzle['board'])
+        board = sudoku.parse_board(puzzle['board'])
         sudoku.solve_board(board)
-        self.assertEqual(sudoku.format_str(spaces=False), puzzle['answer'])
+        self.assertEqual(sudoku.format_board(spaces=False), puzzle['answer'])
+        
+    def test_valid_board(self):
+        sudoku = SudokuMethods()
+        for board in SUDOKU_BOARDS_INVALID:
+            self.assertFalse(sudoku.is_valid_board(board))
 
     def test_format(self):
         sudoku = SudokuMethods()
         for puzzle in SUDOKU_PUZZLES_FORMAT:
             sudoku.set_board(puzzle['single'])
 
-            self.assertEqual(sudoku.format_str(method='single'), puzzle['spaces'])
+            self.assertEqual(sudoku.format_board(method='single'), puzzle['spaces'])
 
-            self.assertEqual(sudoku.format_str(method='single', spaces=False), puzzle['single'])
+            self.assertEqual(sudoku.format_board(method='single', spaces=False), puzzle['single'])
 
             for mp in puzzle['multi']:
-                self.assertEqual(sudoku.format_str(method='multi', placeholder=mp['placeholder']), mp['out'])
+                self.assertEqual(sudoku.format_board(method='multi', placeholder=mp['placeholder']), mp['out'])

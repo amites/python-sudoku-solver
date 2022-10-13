@@ -10,15 +10,15 @@ app = Flask(__name__)
 def solve_puzzle():
     board_string = request.form['board']
     # TODO: add string validation for user input
+    sudoku = SudokuMethods()
     try:
-        board = SudokuMethods.parse_str(board_string)
-        is_valid = SudokuMethods.is_valid_board(board)
+        board = sudoku.set_board(board_string)
+        is_valid = sudoku.is_valid_board(board)
         if not is_valid:
             return 'Invalid', 406
-        sudoku = SudokuMethods()
         result = sudoku.solve_board(board)
         if result:
-            return sudoku.format_str(), 202
+            return sudoku.format_board(), 202
         return 'Invalid', 422
     except AttributeError:
         return 'Invalid Request', 400
@@ -29,10 +29,11 @@ def solve_puzzle():
 @app.route('/validate', methods=['POST'])
 def validate_puzzle():
     board_string = request.form['board']
+    # TODO: add string validation for user input
+    sudoku = SudokuMethods()
     try:
-        # TODO: add string validation for user input
-        board = SudokuMethods.parse_str(board_string)
-        is_valid = SudokuMethods.is_valid_board(board)
+        board = sudoku.parse_board(board_string)
+        is_valid = sudoku.is_valid_board(board)
         if is_valid:
             return 'Valid', 202
         return 'Invalid', 406

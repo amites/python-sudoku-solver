@@ -5,26 +5,28 @@ class SudokuMethods:
     """
     Utility methods for Sudoku puzzles.
     """
-
     def __init__(self):
         self.attempts = 0
         self.board = None
         self.board_original = None
 
     @staticmethod
-    def parse_str(board_str):
-        clean_str = board_str.replace('\n', '').replace(' ', '').replace('\n', '')
-        return [[int(s) if s.isnumeric() else 0 for s in clean_str[idx:idx + 9]]
-                for idx in range(0, len(clean_str), 9)]
+    def parse_board(board):
+        if type(board) != str:
+            return board
+
+        board = board.replace('\n', '').replace(' ', '').replace('\n', '')
+        return [[int(s) if s.isnumeric() else 0 for s in board[idx:idx + 9]]
+                for idx in range(0, len(board), 9)]
 
     def set_board(self, board):
         if type(board) == str:
-            board = self.parse_str(board)
+            board = self.parse_board(board)
         self.board = board
         self.board_original = copy.deepcopy(board)
         return board
 
-    def format_str(self, **kwargs):
+    def format_board(self, **kwargs):
         board = kwargs.get('board', self.board)
         if not board:
             print('ERROR: Board not loaded, cannot parse')
@@ -55,47 +57,32 @@ class SudokuMethods:
         else:
             print('ERROR: method "{}" not supported'.format(method))
             return ''
-
-    @staticmethod
-    def is_valid_board(board):
+    
+    def is_valid_board(self, board=None):
+        if not board:
+            board = self.board
+            if not board:
+                print('ERROR: Board not loaded cannot validate')
+                return False
+        board = self.parse_board(board)
         for i in range(9):
-            valid_row = SudokuMethods._valid_group(board[i])
-            valid_col = SudokuMethods._valid_group([row[i] for row in board])
+            valid_row = self._is_valid_group(board[i])
+            valid_col = self._is_valid_group([row[i] for row in board])
 
             if not valid_row or not valid_col:
                 return False
 
-        return bool(SudokuMethods._valid_squares(board))
-
-    @staticmethod
-    def _valid_group(_group):
-        group = list(filter(lambda a: a != 0, _group))
-        if any(0 > i > 9 for i in group):
-            return False
-        return bool(len(group) == len(set(group)))
-
-    @staticmethod
-    def _valid_squares(board):
-        for row in range(0, 9, 3):
-            for col in range(0, 9, 3):
-                group = []
-                for r in range(row, row + 3):
-                    for c in range(col, col + 3):
-                        if board[r][c] != 0:
-                            group.append(board[r][c])
-                if not SudokuMethods._valid_group(group):
-                    return False
-        return True
+        return bool(self._is_valid_squares(board))
 
     def solve_board(self, board):
         self.set_board(board)
         self.attempts = 0
 
-        self._solve()
+        self._solve_board()
 
         return self.board
 
-    def _solve(self):
+    def _solve_board(self):
         def find_empty():
             for i in range(len(self.board)):
                 for j in range(len(self.board[0])):
@@ -113,12 +100,32 @@ class SudokuMethods:
                 self.board[row][col] = num
 
                 # exit when all results are valid
-                if self._solve():
+                if self._solve_board():
                     return True
                 # invalid result -- reset to 0 and try again
                 self.board[row][col] = 0
         # not solved yet, keep  trying
         return False
+
+    @staticmethod
+    def _is_valid_group(_group):
+        group = list(filter(lambda a: a != 0, _group))
+        if any(0 > i > 9 for i in group):
+            return False
+        return bool(len(group) == len(set(group)))
+
+    @staticmethod
+    def _is_valid_squares(board):
+        for row in range(0, 9, 3):
+            for col in range(0, 9, 3):
+                group = []
+                for r in range(row, row + 3):
+                    for c in range(col, col + 3):
+                        if board[r][c] != 0:
+                            group.append(board[r][c])
+                if not SudokuMethods._is_valid_group(group):
+                    return False
+        return True
 
     def _is_valid_num_position(self, num, position):
         # row check
@@ -144,7 +151,7 @@ class SudokuMethods:
 
 if __name__ == '__main__':
     print('\n\n#### SUDOKU ####\n')
-
+    
     # valid puzzle
     sudoku = SudokuMethods()
     example_puzzle_a = '..3..5..1 2..3...4. 1....7..5 ......... ......... .02..6... ......... 81....... .........'
