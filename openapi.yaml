@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Simple Sudoku API
+  description: A simple API to solve a sudoku puzzle and verify whether a puzzle is valid.
+  contact:
+    name: Alvin Mites
+    url: https://technowizardry.it
+paths:
+  /solve:
+    post:
+      summary: Solve a Sudoku Puzzle
+      description: "Solve a Sudoku Puzzle, input should be a single line of text, each group of 9 characters representing a 'box' for a total of 81 values. Empty spaces can be represented by any non numeric value of 0. Supports formatting spaces and new lines between groups."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - board
+              properties:
+                board:
+                  type: string
+                  example: "..3..5..1 2..3...4. 1....7..5 ......... ......... .02..6... ......... 81....... ........."
+      responses:
+        '202':
+          description: Solution to the puzzle as a string
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "463285791 257319648 189467235 341528967 678193452 592746183 725634819 814952376 936871524"
+        '400':
+          description: Failed to parse part of the user input.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid request"
+        '406':
+          description: Puzzle is invalid, most likely from duplicating numbers in one of the columns / rows / boxes
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid"
+        '422':
+          description: Failed to solve the given puzzle, though it is considered valid (You should never get this response but just in case)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid"
+        '500':
+          description: Unknown server error processing request.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Unknown Error"
+  /valid:
+    post:
+      summary: Check whether a Sudoku Puzzle is valid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - board
+              properties:
+                board:
+                  type: string
+                  example: "..3..5..1 2..3...4. 1....7..5 ......... ......... .02..6... ......... 81....... ........."
+      responses:
+        '202':
+          description: Solution to the puzzle as a string
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Valid"
+        '400':
+          description: Failed to parse part of the user input.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid request"
+        '406':
+          description: Puzzle is invalid, most likely from duplicating numbers in one of the columns / rows / boxes
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid"
+        '500':
+          description: Unknown server error processing request.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Unknown Error"
